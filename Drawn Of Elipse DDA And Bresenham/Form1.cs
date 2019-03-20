@@ -54,7 +54,8 @@ namespace Drawn_Of_Elipse_DDA_And_Bresenham
                 GetRadio(xc,yc,xr,yr);
                 DrawnCoordenada();
                 //ElipseDDA(Rx, Ry);
-               ElipseBresenham(Rx, Ry);
+                //ElipseBresenham(Rx, Ry);
+                midptellipse(Rx, Ry, xc, yc);
 
                 flag = 0;
             }
@@ -94,7 +95,6 @@ namespace Drawn_Of_Elipse_DDA_And_Bresenham
             setPixel(xc - x, yc - y);
             */
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
 
@@ -105,7 +105,6 @@ namespace Drawn_Of_Elipse_DDA_And_Bresenham
             lbl_TimeBresenham.Text = "00 :00";
             lbl_TimeDDA.Text = "00 : 00";
         }
-
         private void DrawnCoordenada()
         {
             int xc, yc, xr, yr;
@@ -122,7 +121,6 @@ namespace Drawn_Of_Elipse_DDA_And_Bresenham
             pictureBox.Image = bmp;
 
         }
-
         private void ElipseDDA(int Rx,int Ry)
         {
             Stopwatch sw = new Stopwatch();
@@ -166,29 +164,31 @@ namespace Drawn_Of_Elipse_DDA_And_Bresenham
 
             lbl_TimeDDA.Text = String.Format("{0}", sw.Elapsed.TotalMilliseconds);
         }
-
         private void ElipseBresenham(int Rx, int Ry)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
             double p1, p2;
+
             int x = 0;
             int y = Ry;
-            double rx2 = Math.Pow(Rx, 2);
-            double ry2 = Math.Pow(Ry, 2);
-            p1 = ry2 - (rx2 * Ry) + (0.25 * rx2);
-            while ((ry2 * x) < (rx2 * y))
+            double Rx2 = Math.Pow(Rx, 2);
+            double Ry2 = Math.Pow(Ry, 2);
+
+            p1 = Ry2 - (Rx2 * Ry) + (0.25 * Rx2);
+
+            while ((Ry2 * x) < (Rx2 * y))
             {
                 if (p1 < 0)
                 {
                     x++;
-                    p1 = p1 + (2 * ry2 * x) + ry2;
+                    p1 = p1 + (2 * Ry2 * x) + Ry2;
                 }
                 else
                 {
                     x++;
                     y--;
-                    p1 = p1 + (2 * ry2 * x) - (2 * rx2 * y) + ry2;
+                    p1 = p1 + (2 * Ry2 * x) - (2 * Rx2 * y) + Ry2;
                 }
 
                 if ((int)x + xc > 0 && (int)x + xc < width && (int)y + yc > 0 && (int)y + yc < height)
@@ -203,19 +203,18 @@ namespace Drawn_Of_Elipse_DDA_And_Bresenham
                 if (x + xc > 0 && x + xc < width && -y + yc > 0 && -y + yc < height)
                     bmp.SetPixel(x + xc, -y + yc, Color.Orange);
             }
-            p2 = (ry2) * Math.Pow((x + 0.5), 2) + (rx2) * Math.Pow((y - 1), 2) - (rx2 * ry2);
+            p2 = (Ry2) * Math.Pow((x + 0.5), 2) + (Rx2) * Math.Pow((y - 1), 2) - (Rx2 * Ry2);
             while (y > 0)
             {
                 if (p2 > 0)
                 {
                     y--;
-                    p2 = p2 - (2 * rx2 * y) + rx2;
+                    p2 = p2 - (2 * Rx2 * y) + Rx2;
                 }
                 else
                 {
-                    x++;
-                    y--;
-                    p2 = p2 + (2 * ry2 * x) - (2 * rx2 * y) + rx2;
+                    x++; y--;
+                    p2 = p2 + (2 * Ry2 * x) - (2 * Rx2 * y) + Rx2;
                 }
 
                 if (x + xc > 0 && x + xc < width && (int)y + yc > 0 && (int)y + yc < height)
@@ -233,7 +232,96 @@ namespace Drawn_Of_Elipse_DDA_And_Bresenham
             }
             lbl_TimeBresenham.Text = String.Format("{0}", sw.Elapsed.TotalMilliseconds);
         }
-        
+
+        private void midptellipse(int Rx, int Ry,int xc, int yc)
+        {
+
+            double dx, dy, d1, d2, x, y;
+            x = 0;
+            y = Ry;
+
+            // Initial decision parameter of region 1 
+            d1 = (Ry * Ry) - (Rx * Rx * Ry) +
+                            (0.25f * Rx * Rx);
+            dx = 2 * Ry * Ry * x;
+            dy = 2 * Rx * Rx * y;
+
+            // For region 1 
+            while (dx < dy)
+            {
+
+                if ((int)x + xc > 0 && (int)x + xc < width && (int)y + yc > 0 && (int)y + yc < height)
+                    bmp.SetPixel((int)x + xc, (int)y + yc, Color.Orange);
+
+                if (-x + xc > 0 && -x + xc < width && y + yc > 0 && y + yc < height)
+                    bmp.SetPixel((int)-x + xc, (int)y + yc, Color.Orange);
+
+                if (-x + xc > 0 && -x + xc < width && -y + yc > 0 && -y + yc < height)
+                    bmp.SetPixel((int)-x + xc, (int)-y + yc, Color.Orange);
+
+                if (x + xc > 0 && x + xc < width && -y + yc > 0 && -y + yc < height)
+                    bmp.SetPixel((int)x + xc, (int)-y + yc, Color.Orange);
+
+
+                // Checking and updating value of 
+                // decision parameter based on algorithm 
+                if (d1 < 0)
+                {
+                    x++;
+                    dx = dx + (2 * Ry * Ry);
+                    d1 = d1 + dx + (Ry * Ry);
+                }
+                else
+                {
+                    x++;
+                    y--;
+                    dx = dx + (2 * Ry * Ry);
+                    dy = dy - (2 * Rx * Rx);
+                    d1 = d1 + dx - dy + (Ry * Ry);
+                }
+            }
+
+            // Decision parameter of region 2 
+            d2 = ((Ry * Ry) * ((x + 0.5f) * (x + 0.5f)))
+                + ((Rx * Rx) * ((y - 1) * (y - 1)))
+                - (Rx * Rx * Ry * Ry);
+
+            // Plotting points of region 2 
+            while (y >= 0)
+            {
+
+                // printing points based on 4-way symmetRy 
+              
+                if ((int)x + xc > 0 && (int)x + xc < width && (int)y + yc > 0 && (int)y + yc < height)
+                    bmp.SetPixel((int)x + xc, (int)y + yc, Color.Orange);
+
+                if (-x + xc > 0 && -x + xc < width && y + yc > 0 && y + yc < height)
+                    bmp.SetPixel((int)-x + xc, (int)y + yc, Color.Orange);
+
+                if (-x + xc > 0 && -x + xc < width && -y + yc > 0 && -y + yc < height)
+                    bmp.SetPixel((int)-x + xc, (int)-y + yc, Color.Orange);
+
+                if (x + xc > 0 && x + xc < width && -y + yc > 0 && -y + yc < height)
+                    bmp.SetPixel((int)x + xc, (int)-y + yc, Color.Orange);
+
+                // Checking and updating parameter 
+                // value based on algorithm 
+                if (d2 > 0)
+                {
+                    y--;
+                    dy = dy - (2 * Rx * Rx);
+                    d2 = d2 + (Rx * Rx) - dy;
+                }
+                else
+                {
+                    y--;
+                    x++;
+                    dx = dx + (2 * Ry * Ry);
+                    dy = dy - (2 * Rx * Rx);
+                    d2 = d2 + dx - dy + (Rx * Rx);
+                }
+            }
+        }
     }
 }
 
